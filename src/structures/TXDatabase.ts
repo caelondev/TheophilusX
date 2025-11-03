@@ -1,5 +1,7 @@
-import mongoose, { Schema, Types } from "mongoose";
+import mongoose, { Schema, Types, Model } from "mongoose";
 import { PrettyLogger as log, LogTag } from "../utils/PrettyLogger";
+import * as path from "path";
+import { glob } from "glob";
 
 export default class TXDatabase {
   private static _connection: typeof mongoose | null = null;
@@ -23,6 +25,8 @@ export default class TXDatabase {
     });
 
     await TXDatabase.connect(process.env.MONGODB_URI!);
+
+    await this.autoMigrate();
 
     log.success({
       message: "TXDatabase ready",
@@ -72,6 +76,124 @@ export default class TXDatabase {
         extra: [error],
       });
       process.exit(1);
+    }
+  }
+
+  private async autoMigrate(): Promise<void> {
+    try {
+      log.info({
+        message: "Starting database auto-migration...",
+        tag: LogTag.DATABASE,
+      });
+
+      const modelsPath = path.join(__dirname, "../database/models");
+      const modelFiles = await glob(`${modelsPath}/**/*.{ts,js}`);
+
+      log.info({
+        message: `Found ${modelFiles.length} model files`,
+        tag: LogTag.DATABASE,
+      });
+
+      for (const modelFile of modelFiles) {
+        try {
+          const modelModule = await import(modelFile);
+          const Model: Model<any> = modelModule.default || modelModule;
+          const modelName = Model.modelName;
+          const collectionName = Model.collection.name;
+
+          log.info({
+            message: `Processing model: ${modelName} (collection: ${collectionName})`,
+            tag: LogTag.DATABASE,
+          });
+
+          const schema = Model.schema;
+          const schemaPaths = schema.paths;
+
+          const documents = await Model.find({}).lean();
+
+          if (documents.length === 0) {
+            log.warn({
+              message: `No documents found in ${collectionName}, skipping...`,
+              tag: LogTag.DATABASE,
+            });
+            continue;
+          }
+
+          let updatedCount = 0;
+          const missingFieldsSet = new Set<string>();
+
+          for (const doc of documents) {
+            const updateFields: Record<string, any> = {};
+            let hasUpdates = false;
+
+            for (const [fieldPath, schemaType] of Object.entries(schemaPaths)) {
+              if (fieldPath === "_id" || fieldPath === "__v") continue;
+
+              if (!(fieldPath in doc)) {
+                const defaultValue = (schemaType as any).defaultValue;
+
+                if (defaultValue !== undefined) {
+                  updateFields[fieldPath] =
+                    typeof defaultValue === "function"
+                      ? defaultValue()
+                      : defaultValue;
+                  hasUpdates = true;
+                  missingFieldsSet.add(fieldPath);
+                } else if (
+                  (schemaType as any).options &&
+                  (schemaType as any).options.default !== undefined
+                ) {
+                  const defVal = (schemaType as any).options.default;
+                  updateFields[fieldPath] =
+                    typeof defVal === "function" ? defVal() : defVal;
+                  hasUpdates = true;
+                  missingFieldsSet.add(fieldPath);
+                }
+              }
+            }
+
+            if (hasUpdates) {
+              await Model.updateOne({ _id: doc._id }, { $set: updateFields });
+              updatedCount++;
+            }
+          }
+
+          if (updatedCount > 0) {
+            const missingFields = Array.from(missingFieldsSet).join(", ");
+            log.info({
+              message: `Found missing fields (${missingFields}) in ${collectionName}`,
+              tag: LogTag.DATABASE,
+            });
+            log.success({
+              message: `Updated ${updatedCount} documents in ${collectionName}`,
+              tag: LogTag.DATABASE,
+            });
+          } else {
+            log.success({
+              message: `All documents in ${collectionName} are up to date`,
+              tag: LogTag.DATABASE,
+            });
+          }
+        } catch (modelError: any) {
+          log.error({
+            message: `Error processing model file ${modelFile}`,
+            tag: LogTag.DATABASE,
+            extra: [modelError.message],
+          });
+        }
+      }
+
+      log.success({
+        message: "Database auto-migration completed!",
+        tag: LogTag.DATABASE,
+      });
+    } catch (error: any) {
+      log.error({
+        message: "Auto-migration failed",
+        tag: LogTag.DATABASE,
+        extra: [error.message],
+      });
+      throw error;
     }
   }
 

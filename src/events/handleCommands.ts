@@ -13,7 +13,7 @@ import { PrettyLogger as log, LogTag } from "../utils/PrettyLogger";
 
 const cooldowns = new Map<string, number>();
 
-const getKey = (commandName: string, id: string) => `${commandName}-${id}`;
+const getKey = (commandName: string, id: string, guildId: string) => `${commandName}-${id}-${guildId}`;
 
 const isOnCooldown = (key: string) => {
   const expiry = cooldowns.get(key);
@@ -40,7 +40,7 @@ export default new TXEvent("interactionCreate", async (interaction) => {
 
   const commandName = interaction.commandName;
   const command = client.commands.get(commandName);
-  const key = getKey(commandName, interaction.user.id);
+  const key = getKey(commandName, interaction.user.id, interaction.guild?.id || "");
 
   if (isOnCooldown(key)) {
     const remaining = getRemainingCooldown(key);

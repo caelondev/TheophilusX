@@ -19,6 +19,7 @@
     "glob": "^11.0.3",
     "gradient-string": "^3.0.0",
     "mongoose": "^8.19.2",
+    "pretty-ms": "^9.3.0",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
   }
