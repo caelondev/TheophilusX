@@ -5,7 +5,12 @@
  * See LICENSE file for details.
  */
 
-import { CommandInteractionOptionResolver, MessageFlags, EmbedBuilder } from "discord.js";
+import {
+  CommandInteractionOptionResolver,
+  MessageFlags,
+  EmbedBuilder,
+  GuildMember,
+} from "discord.js";
 import { client } from "../main";
 import { TXEvent } from "../structures/TXEvent";
 import { GuildInteraction } from "../typings/Command";
@@ -13,7 +18,8 @@ import { PrettyLogger as log, LogTag } from "../utils/PrettyLogger";
 
 const cooldowns = new Map<string, number>();
 
-const getKey = (commandName: string, id: string, guildId: string) => `${commandName}-${id}-${guildId}`;
+const getKey = (commandName: string, id: string, guildId: string) =>
+  `${commandName}-${id}-${guildId}`;
 
 const isOnCooldown = (key: string) => {
   const expiry = cooldowns.get(key);
@@ -32,7 +38,7 @@ const setCooldown = (key: string, durationMs: number) => {
 const getRemainingCooldown = (key: string) => {
   const expiry = cooldowns.get(key);
   if (!expiry) return 0;
-  return (Math.max(0, (expiry - Date.now()) / 1000)).toFixed(2);
+  return Math.max(0, (expiry - Date.now()) / 1000).toFixed(2);
 };
 
 export default new TXEvent("interactionCreate", async (interaction) => {
@@ -40,7 +46,12 @@ export default new TXEvent("interactionCreate", async (interaction) => {
 
   const commandName = interaction.commandName;
   const command = client.commands.get(commandName);
-  const key = getKey(commandName, interaction.user.id, interaction.guild?.id || "");
+  const member = interaction.member as GuildMember
+  const key = getKey(
+    commandName,
+    interaction.user.id,
+    interaction.guild?.id || "",
+  );
 
   if (isOnCooldown(key)) {
     const remaining = getRemainingCooldown(key);
@@ -48,12 +59,19 @@ export default new TXEvent("interactionCreate", async (interaction) => {
       .setTitle("Command on Cooldown")
       .setDescription(`You cannot use the **${commandName}** command yet.`)
       .addFields(
-        { name: "Command's Cooldown", value: `${(command?.cooldown || 0) / 1000}s`, inline: true },
-        { name: "Time Remaining", value: `${remaining}s`, inline: true }
+        {
+          name: "Command's Cooldown",
+          value: `${(command?.cooldown || 0) / 1000}s`,
+          inline: true,
+        },
+        { name: "Time Remaining", value: `${remaining}s`, inline: true },
       )
       .setColor("Blurple");
 
-    return interaction.reply({ embeds: [cooldownEmbed], flags: MessageFlags.Ephemeral });
+    return interaction.reply({
+      embeds: [cooldownEmbed],
+      flags: MessageFlags.Ephemeral,
+    });
   }
 
   if (!command) {
@@ -61,6 +79,20 @@ export default new TXEvent("interactionCreate", async (interaction) => {
       content: `The command "${commandName}" does not exist. Please try again later...`,
       flags: MessageFlags.Ephemeral,
     });
+  }
+
+  if(command.userPermissions?.length && !member.permissions.has(command.userPermissions)){
+    const permissionsEmbed = new EmbedBuilder().setColor("Red").setTitle(`Cannot execute the command "${command.name}"`).setDescription("You don't have enough permission to execute this command")
+    return interaction.reply({
+      embeds: [permissionsEmbed]
+    })
+  }
+
+  if(command.botPermissions?.length && !interaction.guild?.members.me?.permissions.has(command.botPermissions)){
+    const permissionsEmbed = new EmbedBuilder().setColor("Red").setTitle(`Cannot execute the command "${command.name}"`).setDescription("I don't have enough permission to execute this command")
+    return interaction.reply({
+      embeds: [permissionsEmbed]
+    })
   }
 
   try {
@@ -75,7 +107,7 @@ export default new TXEvent("interactionCreate", async (interaction) => {
     log.error({
       message: `An error occurred whilst trying to execute the command "${interaction.commandName}"`,
       tag: LogTag.COMMANDS,
-      extra: [error]
+      extra: [error],
     });
   }
 });

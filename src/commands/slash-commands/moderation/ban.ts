@@ -9,20 +9,20 @@ import { ApplicationCommandOptionType, EmbedBuilder, MessageFlags, PermissionFla
 import TXSlashCommand from "../../../structures/TXSlashCommand";
 
 export default new TXSlashCommand({
-  name: "kick",
-  description: "Kick a member from the server",
-  userPermissions: [PermissionFlagsBits.KickMembers],
-  botPermissions: [PermissionFlagsBits.KickMembers],
+  name: "ban",
+  description: "Ban a member from the server",
+  userPermissions: [PermissionFlagsBits.BanMembers],
+  botPermissions: [PermissionFlagsBits.BanMembers],
   options: [
     {
       name: "user",
-      description: "The user to kick",
+      description: "The user to ban",
       type: ApplicationCommandOptionType.User,
       required: true
     },
     {
       name: "reason",
-      description: "Reason for kicking",
+      description: "Reason for baning",
       type: ApplicationCommandOptionType.String,
       required: false
     }
@@ -39,23 +39,23 @@ export default new TXSlashCommand({
       });
     }
 
-    if (!member.kickable) {
+    if (!member.bannable) {
       return interaction.reply({
-        content: `I cannot kick ${user.tag}. They may have higher roles than me or I lack permissions.`,
+        content: `I cannot ban ${user.username}. They may have higher roles than me or I lack permissions.`,
         flags: MessageFlags.Ephemeral
       });
     }
 
     try {
-      const kickEmbed = new EmbedBuilder().setDescription(`Successfully kicked ${user.username}\nreason: ${reason}`)
-      await member.kick(reason);
+      const banEmbed = new EmbedBuilder().setDescription(`Successfully banned ${user.username}\nreason: ${reason}`)
+      await member.ban({ reason });
       await interaction.reply({
-        embeds: [kickEmbed]
+        embeds: [ banEmbed ]
       });
     } catch (error) {
       console.error(error);
       await interaction.reply({
-        content: `Failed to kick ${user.tag}.`,
+        content: `Failed to ban ${user.tag}.`,
         flags: MessageFlags.Ephemeral
       });
     }

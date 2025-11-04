@@ -26,7 +26,8 @@ interface ExecuteOptions {
 type ExecuteFunction = (options: ExecuteOptions) => any;
 
 export type CommandType = {
-  userPermissions?: PermissionResolvable[];
+  userPermissions?: PermissionResolvable[] | bigint[];
+  botPermissions?: PermissionResolvable[] | bigint[]
   cooldown?: number;
   private?: boolean;
   execute: ExecuteFunction;
