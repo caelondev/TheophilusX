@@ -9,8 +9,8 @@ import TXCommand from "../../../structures/TXCommand";
 import config from "../../../../txconfig.json";
 import { EmbedBuilder } from "discord.js";
 import TheophilusX from "../../../structures/TheophilusX";
-import { GuildMessage } from "../../../typings/Command";
 import setEphemeral from "../../../utils/setEphemeral";
+import { GuildMessage } from "../../../typings/Command";
 
 const PREFIX = config.secondaryPrefix;
 
@@ -41,7 +41,8 @@ async function listAllCommands(client: TheophilusX, message: GuildMessage) {
     .setTitle(`All \`${PREFIX}\` Commands`)
     .setDescription(getFormattedCommandList(client))
     .addFields(
-      { name: "Inspect a Command", value: `Use \`${PREFIX}help <command_name>\` to see details.` },
+      { name: "Command flags", value: `**(notes)**\n**[optional_argument]**\n**<required_argument>**` },
+      { name: "Inspect a Command", value: `Use \`${PREFIX}help [command_name]\` to see command information.` },
       { name: "Example", value: `\`${PREFIX}help ping\`` }
     );
 

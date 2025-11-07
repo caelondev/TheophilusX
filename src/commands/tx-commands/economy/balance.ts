@@ -17,16 +17,18 @@ export default new TXCommand({
   cooldown: 3000,
   serverOnly: true,
   execute: async ({ message, args }) => {
-    const targetUser = (await fetchUser(args[0])) || message.author
+    const targetUser = (await fetchUser(args[0])) || message.author;
 
     const query = {
       userId: targetUser.id,
-      guildId: message.guild?.id
-    }
-    let user = await Users.findOne(query)
-    if(!user) user = new Users(query)
-    
-    const reply = await message.reply(`**${targetUser.displayName}'s** balance is: **${user.balance}**`)
-    await setEphemeral(reply)
-  }
+      guildId: message.guild?.id,
+    };
+    let user = await Users.findOne(query);
+    if (!user) user = new Users(query);
+
+    const reply = await message.reply(
+      `**${targetUser.displayName}'s** balance is: **${user.balance}**`,
+    );
+    await setEphemeral(reply);
+  },
 });

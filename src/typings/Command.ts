@@ -39,23 +39,23 @@ type ExecuteTXFunction = (options: TXExecuteOptions) => any;
 
 type CommandType = {
   userPermissions?: PermissionResolvable[] | bigint[];
-  botPermissions?: PermissionResolvable[] | bigint[]
+  botPermissions?: PermissionResolvable[] | bigint[];
   cooldown?: number;
   private?: boolean;
   serverOnly?: boolean;
   execute: ExecuteFunction;
-}
+};
 
-export type SlashCommandType = CommandType & ChatInputApplicationCommandData
+export type SlashCommandType = CommandType & ChatInputApplicationCommandData;
 
 export type TXCommandType = {
-  name: string,
-  description: string,
+  name: string;
+  description: string;
+  syntax: string;
+  execute: ExecuteTXFunction;
   userPermissions?: PermissionResolvable[] | bigint[];
   botPermissions?: PermissionResolvable[] | bigint[];
   cooldown?: number;
   private?: boolean;
-  serverOnly?: boolean
-  syntax: string;
-  execute: ExecuteTXFunction;
-}
+  serverOnly?: boolean;
+};

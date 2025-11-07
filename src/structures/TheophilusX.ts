@@ -238,10 +238,6 @@ export default class TheophilusX extends Client {
               description,
               options,
             });
-            log.info({
-              message: `Edited command "${name}"`,
-              tag: LogTag.COMMANDS,
-            });
           }
         } else {
           await applicationCommands.create({

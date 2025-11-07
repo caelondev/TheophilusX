@@ -7,10 +7,12 @@
 
 import { ApplicationCommandOptionType, EmbedBuilder, MessageFlags, PermissionFlagsBits } from "discord.js";
 import TXSlashCommand from "../../../structures/TXSlashCommand";
+import { AccessLevel } from "../../../typings/Command";
 
 export default new TXSlashCommand({
   name: "ban",
   description: "Ban a member from the server",
+  accessLevel: AccessLevel.VERIFIED,
   userPermissions: [PermissionFlagsBits.BanMembers],
   botPermissions: [PermissionFlagsBits.BanMembers],
   serverOnly: true,

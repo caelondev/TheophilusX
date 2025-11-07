@@ -12,8 +12,9 @@ import { GuildMessage } from "../typings/Command";
 import capitalizeFirstLetter from "../utils/capitalizeFirstLetter";
 import globalFlags from "../constants/globalFlags";
 import { PrettyLogger as log, LogTag } from "../utils/PrettyLogger";
-import { GuildMember } from "discord.js";
+import { EmbedBuilder, GuildMember } from "discord.js";
 import setEphemeral from "../utils/setEphemeral";
+import VerifyTemplateSchema from "../database/models/VerifyTemplateSchema";
 
 export default new TXEvent("messageCreate", async (message) => {
   if (message.author.bot) return;
@@ -26,11 +27,20 @@ export default new TXEvent("messageCreate", async (message) => {
   const usedFlags: string[] = [];
   const member = message.member as GuildMember
   const bot = message.guild.members.me
-
+  const verifyTemplateSchema = await VerifyTemplateSchema.findOne({ guildId: message.guild.id })
   const commandName = tokens[0];
   const args = tokens.slice(1);
 
   if (!commandName) return;
+
+  if(verifyTemplateSchema && verifyTemplateSchema.verificationEnabled && !member.roles.cache.has(verifyTemplateSchema.verifiedRole)){
+    if(!["verify", "help"].includes(commandName)){
+      const embed = new EmbedBuilder().setDescription(`Verify yourself with \`${prefix} verify\` before using any commands`)
+      .setColor("Red")
+
+      return message.reply({ embeds: [embed] })
+    }
+  }
 
   for (const arg of args) {
     const flagPrefix = config.commandFlagPrefix;

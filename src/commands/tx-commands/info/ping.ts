@@ -6,12 +6,11 @@
  */
 
 import TXCommand from "../../../structures/TXCommand";
-import { PermissionFlagsBits } from "discord.js";
 
 export default new TXCommand({
   name: "ping",
   description: "Pong!",
-  syntax: "ping [no arguments used]",
+  syntax: "ping",
   cooldown: 3000,
   execute: async ({ message, client }) => {
     const start = Date.now();
