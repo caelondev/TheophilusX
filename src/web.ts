@@ -4,6 +4,8 @@ import { PrettyLogger as log, LogTag } from "./utils/PrettyLogger"
 const app = express()
 const PORT = process.env.PORT || 8080
 
+app.set("trust proxy", true)
+
 app.get("/", (req, res)=>{
   res.send("Bot is online")
 })
