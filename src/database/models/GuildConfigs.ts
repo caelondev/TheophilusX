@@ -22,7 +22,7 @@ const guildConfigsSchema = new Schema({
   },
   welcomeTitle: {
     type: String,
-    default: "Welcome home, {{user_name}}!"
+    default: "Welcome home, {{username}}!"
   },
   welcomeMessage: {
     type: String,

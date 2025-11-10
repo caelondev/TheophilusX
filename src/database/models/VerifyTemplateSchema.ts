@@ -15,7 +15,7 @@ export interface IVerifyTemplate extends Document {
 
 const verifyTemplateSchema = new Schema<IVerifyTemplate>({
   guildId: { type: String, required: true },
-  verificationEnabled: { type: Boolean, default: false },
+  verificationEnabled: { type: Boolean, default: true },
   verifiedRole: { type: String, default: null },
 });
 
