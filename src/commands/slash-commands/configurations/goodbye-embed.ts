@@ -12,103 +12,132 @@ import {
 } from "discord.js";
 import TXSlashCommand from "../../../structures/TXSlashCommand";
 import GuildConfigs from "../../../database/models/GuildConfigs";
-import TXVariable from "../../../structures/TXVariables";
+import { TXVariableParserContext } from "../../../typings/Variables";
+import buildEmbed from "../../../utils/buildEmbed";
 
 export default new TXSlashCommand({
   name: "goodbye-embed",
-  description: "Configure goodbye message (variables supported)",
-  cooldown: 2000,
+  description: "Manage your goodbye embed",
+  userPermissions: [PermissionFlagsBits.ManageGuild],
   serverOnly: true,
   options: [
     {
-      name: "toggle",
-      description: "Toggles goodbye message (on | off)",
-      type: ApplicationCommandOptionType.Subcommand,
-    },
-    {
-      name: "test",
-      description: "Sends an embed of how your goodbye embed will look like",
-      type: ApplicationCommandOptionType.Subcommand,
-    },
-    {
       name: "set",
-      description: "Sets the goodbye message for this server",
+      description: "Set your goodbye embed",
       type: ApplicationCommandOptionType.Subcommand,
       options: [
         {
-          name: "new-message",
-          description: "The new goodbye message",
+          name: "embed-name",
+          description: "Name of the embed (configurable in /embed-builder)",
           type: ApplicationCommandOptionType.String,
           required: true,
         },
         {
-          name: "new-title",
-          description: "The new goodbye title",
-          type: ApplicationCommandOptionType.String,
+          name: "channel",
+          description: "Name of the embed (configurable in /embed-builder)",
+          type: ApplicationCommandOptionType.Channel,
+          required: true,
         },
       ],
     },
+    {
+      name: "toggle",
+      description: "Toggle the goodbye embed on/off",
+      type: ApplicationCommandOptionType.Subcommand,
+    },
+    {
+      name: "test",
+      description: "Preview the current goodbye embed",
+      type: ApplicationCommandOptionType.Subcommand,
+    },
   ],
-  userPermissions: [PermissionFlagsBits.ModerateMembers],
   execute: async ({ interaction, args }) => {
-    const subcommand = args.getSubcommand()!;
-    let guildConfig = await GuildConfigs.findOne({
+    await interaction.deferReply();
+
+    const guildConfig = await GuildConfigs.findOne({
       guildId: interaction.guild?.id,
     });
-    if (!guildConfig)
-      guildConfig = new GuildConfigs({ guildId: interaction.guild?.id });
 
-    const variables = new TXVariable();
+    if (!guildConfig) {
+      return interaction.editReply({
+        content:
+          "No guild config found in this server...\nCreate one with `/embed-builder`",
+      });
+    }
 
-    const context = {
-      user: interaction.user!,
-      member: interaction.member!,
-      guild: interaction.guild!,
-      channel: interaction.channel!,
-    };
+    const subcommand = args.getSubcommand();
 
     switch (subcommand) {
-      case "set":
-        const newMessage = args.getString("new-message")!;
-        const newTitle = args.getString("new-title") ?? "";
+      case "set": {
+        const embedName = args.getString("embed-name")!;
+        const channel = args.getChannel("channel")!
+        const embedConfig = guildConfig.embeds.find(
+          (data) => data.name === embedName,
+        );
 
-        guildConfig.goodbyeMessage = newMessage;
-        guildConfig.goodbyeTitle = newTitle;
+        if (!embedConfig) {
+          return interaction.editReply({
+            content: `An embed with a name of "${embedName}" was not found...\nCreate one with \`/embed-builder\``,
+          });
+        }
+
+        guildConfig.goodbyeChannel = channel.id
+        guildConfig.goodbyeEmbed = embedConfig;
         await guildConfig.save();
 
-        const setEmbed = new EmbedBuilder()
-          .setColor("Red")
-          .setDescription(
-            `Successfully changed goodbye message to\n\nTitle: ${guildConfig.goodbyeTitle}\n\`\`\`${guildConfig.goodbyeMessage}\`\`\``
-          );
+        const context: TXVariableParserContext = {
+          user: interaction.user,
+          member: interaction.member,
+          guild: interaction.guild!,
+          channel: interaction.channel!,
+        };
 
-        interaction.reply({ embeds: [setEmbed] });
-        break;
+        const previewEmbed = await buildEmbed(embedConfig, context);
 
-      case "toggle":
-        guildConfig.goodbyeMessageToggle = !guildConfig.goodbyeMessageToggle;
+        return interaction.editReply({
+          content: `Goodbye embed has been set to "${embedName}"!`,
+          embeds: [previewEmbed],
+        });
+      }
+
+      case "toggle": {
+        guildConfig.goodbyeToggle = !guildConfig.goodbyeToggle;
         await guildConfig.save();
 
-        const toggleEmbed = new EmbedBuilder()
-          .setColor("Red")
-          .setDescription(
-            `Toggled goodbye messages "${guildConfig.goodbyeMessageToggle ? "On" : "Off"}"`
-          );
+        const status = guildConfig.goodbyeToggle ? "enabled" : "disabled";
 
-        interaction.reply({ embeds: [toggleEmbed] });
-        break;
+        return interaction.editReply({
+          content: `Goodbye embed has been **${status}**!`,
+        });
+      }
 
-      case "test":
-        const parsedTitle = await variables.parse(guildConfig.goodbyeTitle, context);
-        const parsedMessage = await variables.parse(guildConfig.goodbyeMessage, context);
+      case "test": {
+        if (!guildConfig.goodbyeEmbed) {
+          return interaction.editReply({
+            content:
+              "No goodbye embed has been set yet!\nSet one with `/goodbye-embed set`",
+          });
+        }
 
-        const testEmbed = new EmbedBuilder()
-          .setTitle(parsedTitle || null)
-          .setDescription(parsedMessage)
-          .setColor("Red");
+        const context: TXVariableParserContext = {
+          user: interaction.user,
+          member: interaction.member,
+          guild: interaction.guild!,
+          channel: interaction.channel!,
+        };
 
-        interaction.reply({ embeds: [testEmbed] });
-        break;
+        const testEmbed = await buildEmbed(guildConfig.goodbyeEmbed, context);
+
+        return interaction.editReply({
+          content: "**Goodbye Embed Preview:**",
+          embeds: [testEmbed],
+        });
+      }
+
+      default:
+        return interaction.editReply({
+          content: "Invalid subcommand!",
+        });
     }
   },
 });

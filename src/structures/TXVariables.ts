@@ -5,8 +5,11 @@
  * See LICENSE file for details.
  */
 
-import { client } from "../main";
-import { TXVariableDefaultObject, TXVariableOptions, TXVariableParserContext } from "../typings/Variables";
+import {
+  TXVariableDefaultObject,
+  TXVariableOptions,
+  TXVariableParserContext,
+} from "../typings/Variables";
 import config from "../../txconfig.json";
 
 export default class TXVariable {
@@ -64,12 +67,14 @@ export default class TXVariable {
         {
           placeholder: "{user}",
           description: "Mentions the event emitter (user)",
-          formatter: (context: TXVariableParserContext) => context.user?.toString(),
+          formatter: (context: TXVariableParserContext) =>
+            context.user?.toString(),
         },
         {
           placeholder: "{user.displayName}",
           description: "Returns the user's display name",
-          formatter: (context: TXVariableParserContext) => context.user?.displayName,
+          formatter: (context: TXVariableParserContext) =>
+            context.user?.displayName,
         },
         {
           placeholder: "{user.id}",
@@ -79,27 +84,38 @@ export default class TXVariable {
         {
           placeholder: "{user.username}",
           description: "Returns the user's username",
-          formatter: (context: TXVariableParserContext) => context.user?.username,
+          formatter: (context: TXVariableParserContext) =>
+            context.user?.username,
         },
         {
           placeholder: "{user.tag}",
-          description: "Returns the user's tag (username#discriminator or just username)",
+          description:
+            "Returns the user's tag (username#discriminator or just username)",
           formatter: (context: TXVariableParserContext) => context.user?.tag,
         },
         {
-          placeholder: "{user.avatar}",
+          placeholder: "{user.avatarUrl}",
           description: "Returns the user's avatar URL",
-          formatter: (context: TXVariableParserContext) => context.user?.displayAvatarURL(),
+          formatter: (context: TXVariableParserContext) =>
+            context.user?.displayAvatarURL(),
+        },
+        {
+          placeholder: "{user.bannerUrl}",
+          description: "Returns the user's banner URL",
+          formatter: (context: TXVariableParserContext) =>
+            context.user?.bannerURL(),
         },
         {
           placeholder: "{user.createdAt}",
           description: "Returns when the user's account was created",
-          formatter: (context: TXVariableParserContext) => context.user?.createdAt?.toLocaleDateString(),
+          formatter: (context: TXVariableParserContext) =>
+            context.user?.createdAt?.toLocaleDateString(),
         },
         {
           placeholder: "{user.bot}",
-          description: "Returns true if user is a bot",
-          formatter: (context: TXVariableParserContext) => context.user?.bot?.toString(),
+          description: "Returns \"Yes\" / \"No\" if user is a bot",
+          formatter: (context: TXVariableParserContext) =>
+            context.user?.bot?.toString() ? "Yes" : "No",
         },
       ],
 
@@ -107,32 +123,45 @@ export default class TXVariable {
         {
           placeholder: "{member.nickname}",
           description: "Returns the user's server nickname",
-          formatter: (context: TXVariableParserContext) => context.member?.nickname,
+          formatter: (context: TXVariableParserContext) =>
+            context.member?.nickname,
         },
         {
           placeholder: "{member.joinedAt}",
           description: "Returns when the member joined the server",
-          formatter: (context: TXVariableParserContext) => context.member?.joinedAt?.toLocaleDateString(),
+          formatter: (context: TXVariableParserContext) =>
+            context.member?.joinedAt?.toLocaleDateString(),
         },
         {
           placeholder: "{member.roles}",
           description: "Returns the count of member's roles",
-          formatter: (context: TXVariableParserContext) => context.member?.roles?.cache?.size?.toString(),
+          formatter: (context: TXVariableParserContext) =>
+            context.member?.roles?.cache?.size?.toString(),
+        },
+        {
+          placeholder: "{member.permissions}",
+          description: "Returns the permission of the user",
+          formatter: (context: TXVariableParserContext) =>
+            context.member?.roles?.cache?.size?.toString(),
         },
         {
           placeholder: "{member.highestRole}",
           description: "Returns the member's highest role name",
-          formatter: (context: TXVariableParserContext) => context.member?.roles?.highest?.name,
+          formatter: (context: TXVariableParserContext) =>
+            context.member?.roles?.highest?.name,
         },
         {
           placeholder: "{member.color}",
           description: "Returns the member's role color in hex",
-          formatter: (context: TXVariableParserContext) => context.member?.displayHexColor,
+          formatter: (context: TXVariableParserContext) =>
+            context.member?.displayHexColor,
         },
         {
           placeholder: "{member.displayName}",
-          description: "Returns the member's display name (nickname or username)",
-          formatter: (context: TXVariableParserContext) => context.member?.displayName,
+          description:
+            "Returns the member's display name (nickname or username)",
+          formatter: (context: TXVariableParserContext) =>
+            context.member?.displayName,
         },
       ],
 
@@ -150,12 +179,14 @@ export default class TXVariable {
         {
           placeholder: "{guild.memberCount}",
           description: "Returns the total member count",
-          formatter: (context: TXVariableParserContext) => context.guild?.memberCount?.toString(),
+          formatter: (context: TXVariableParserContext) =>
+            context.guild?.memberCount?.toString(),
         },
         {
           placeholder: "{guild.icon}",
           description: "Returns the guild icon URL",
-          formatter: (context: TXVariableParserContext) => context.guild?.iconURL(),
+          formatter: (context: TXVariableParserContext) =>
+            context.guild?.iconURL(),
         },
         {
           placeholder: "{guild.owner}",
@@ -168,32 +199,56 @@ export default class TXVariable {
         {
           placeholder: "{guild.ownerId}",
           description: "Returns the guild owner's ID",
-          formatter: (context: TXVariableParserContext) => context.guild?.ownerId,
+          formatter: (context: TXVariableParserContext) =>
+            context.guild?.ownerId,
+        },
+        {
+          placeholder: "{guild.verificationLevel}",
+          description: "Returns the guild's verification level",
+          formatter: (context: TXVariableParserContext) =>
+            context.guild?.ownerId,
         },
         {
           placeholder: "{guild.createdAt}",
           description: "Returns when the guild was created",
-          formatter: (context: TXVariableParserContext) => context.guild?.createdAt?.toLocaleDateString(),
+          formatter: (context: TXVariableParserContext) =>
+            context.guild?.createdAt?.toLocaleDateString(),
         },
         {
           placeholder: "{guild.boostCount}",
           description: "Returns the number of server boosts",
-          formatter: (context: TXVariableParserContext) => context.guild?.premiumSubscriptionCount?.toString(),
+          formatter: (context: TXVariableParserContext) =>
+            context.guild?.premiumSubscriptionCount?.toString(),
         },
         {
           placeholder: "{guild.boostLevel}",
           description: "Returns the server boost level (0-3)",
-          formatter: (context: TXVariableParserContext) => context.guild?.premiumTier?.toString(),
+          formatter: (context: TXVariableParserContext) =>
+            context.guild?.premiumTier?.toString(),
         },
         {
           placeholder: "{guild.description}",
           description: "Returns the guild description",
-          formatter: (context: TXVariableParserContext) => context.guild?.description,
+          formatter: (context: TXVariableParserContext) =>
+            context.guild?.description,
+        },
+        {
+          placeholder: "{guild.systemChannel}",
+          description: "Returns the guild system channel",
+          formatter: (context: TXVariableParserContext) =>
+            context.guild?.systemChannel,
+        },
+        {
+          placeholder: "{guild.vanityUrl}",
+          description: "Returns the guild vanity URL",
+          formatter: (context: TXVariableParserContext) =>
+            context.guild?.vanityURLCode,
         },
         {
           placeholder: "{guild.banner}",
           description: "Returns the guild banner URL",
-          formatter: (context: TXVariableParserContext) => context.guild?.bannerURL(),
+          formatter: (context: TXVariableParserContext) =>
+            context.guild?.bannerURL(),
         },
       ],
 
@@ -201,7 +256,8 @@ export default class TXVariable {
         {
           placeholder: "{channel}",
           description: "Mentions the channel where the event was emitted",
-          formatter: (context: TXVariableParserContext) => context.channel?.toString(),
+          formatter: (context: TXVariableParserContext) =>
+            context.channel?.toString(),
         },
         {
           placeholder: "{channel.name}",
@@ -209,7 +265,7 @@ export default class TXVariable {
           formatter: (context: TXVariableParserContext) => {
             const channel = context.channel;
             if (!channel) return undefined;
-            if ('name' in channel) return channel.name as string;
+            if ("name" in channel) return channel.name as string;
             return undefined;
           },
         },
@@ -219,9 +275,20 @@ export default class TXVariable {
           formatter: (context: TXVariableParserContext) => context.channel?.id,
         },
         {
+          placeholder: "{channel.isNsfw}",
+          description: "Returns \"Yes\" / \"No\" whether the current channel is age-restricted",
+          formatter: (context: TXVariableParserContext) => {
+            const channel = context.channel;
+            if (!channel) return undefined;
+            if ("nsfw" in channel) return channel.nsfw ? "Yes" : "No";
+            return undefined;
+          },
+        },
+        {
           placeholder: "{channel.type}",
           description: "Returns the channel type",
-          formatter: (context: TXVariableParserContext) => context.channel?.type?.toString(),
+          formatter: (context: TXVariableParserContext) =>
+            context.channel?.type?.toString(),
         },
         {
           placeholder: "{channel.url}",
@@ -229,7 +296,7 @@ export default class TXVariable {
           formatter: (context: TXVariableParserContext) => {
             const channel = context.channel;
             if (!channel) return undefined;
-            if ('url' in channel) return channel.url as string;
+            if ("url" in channel) return channel.url as string;
             return undefined;
           },
         },
@@ -264,7 +331,8 @@ export default class TXVariable {
         {
           placeholder: "{month}",
           description: "Returns the current month name",
-          formatter: () => new Date().toLocaleDateString('en-US', { month: 'long' }),
+          formatter: () =>
+            new Date().toLocaleDateString("en-US", { month: "long" }),
         },
         {
           placeholder: "{day}",
@@ -292,23 +360,22 @@ export default class TXVariable {
         {
           placeholder: "{prefix}",
           description: `Inserts TheophilusX's secondary prefix ${config.command.secondaryPrefix}`,
-          formatter: () => config.command.secondaryPrefix
-        }
+          formatter: () => config.command.secondaryPrefix,
+        },
       ],
     };
 
     // Flatten the object structure and register all placeholders
-    for (const [category, placeholders] of Object.entries(DEFAULT_VARIABLE_PLACEHOLDERS)) {
+    for (const [category, placeholders] of Object.entries(
+      DEFAULT_VARIABLE_PLACEHOLDERS,
+    )) {
       this.categorizedPlaceholders[category] = placeholders;
 
       for (const placeholder of placeholders) {
-        this.placeholders.set(
-          placeholder.placeholder,
-          {
-            description: placeholder.description,
-            formatter: placeholder.formatter,
-          }
-        );
+        this.placeholders.set(placeholder.placeholder, {
+          description: placeholder.description,
+          formatter: placeholder.formatter,
+        });
       }
     }
   }

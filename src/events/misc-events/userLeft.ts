@@ -8,37 +8,28 @@
 import { client } from "../../main";
 import { TXEvent } from "../../structures/TXEvent";
 import GuildConfigs from "../../database/models/GuildConfigs";
-import { EmbedBuilder } from "discord.js";
-import TXVariable from "../../structures/TXVariables";
 import { TXVariableParserContext } from "../../typings/Variables";
+import buildEmbed from "../../utils/buildEmbed";
 
 export default new TXEvent("guildMemberRemove", async (member) => {
   if (member.id === client.user?.id) return;
 
-  let guildConfig = await GuildConfigs.findOne({ guildId: member.guild.id });
-  if (!guildConfig)
-    guildConfig = new GuildConfigs({ guildId: member.guild.id });
+  const guildConfig = await GuildConfigs.findOne({ guildId: member.guild.id });
 
-  guildConfig.save();
-
-  if (!guildConfig.goodbyeMessageToggle) return;
+  if (!guildConfig || !guildConfig.goodbyeEmbed || !guildConfig.goodbyeToggle)
+    return;
 
   const context: TXVariableParserContext = {
     user: member.user,
-    guild: member.guild,
+    guild: member.guild!,
   };
+  const embed = await buildEmbed(guildConfig.goodbyeEmbed, context);
+  if (!embed) return;
+  const channelId = guildConfig.goodbyeChannel;
 
-  const title = await new TXVariable().parse(guildConfig.goodbyeTitle, context);
-  const message = await new TXVariable().parse(guildConfig.goodbyeMessage, context);
+  const channel = member.guild.channels.cache.get(channelId);
 
-  const embed = new EmbedBuilder()
-    .setColor("Red")
-    .setTitle(title || null)
-    .setDescription(message);
+  if (!channel || !channel.isTextBased()) return;
 
-  const channel =
-    member.guild.channels.cache.get(guildConfig.goodbyeChannel) ||
-    member.guild.systemChannel;
-
-  if (channel?.isTextBased()) await channel.send({ embeds: [embed] });
+  channel.send({ embeds: [embed] });
 });

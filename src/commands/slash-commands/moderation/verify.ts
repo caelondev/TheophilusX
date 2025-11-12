@@ -127,14 +127,10 @@ async function setVerify(
   verifyTemplateSchema.verifiedRole = role.id;
   await verifyTemplateSchema.save();
 
-  verifyEmbed
-    .setDescription(
-      `${message}\n\nEnter \`${config.command.secondaryPrefix} verify\` to verify yourself...`,
-    )
-    .addFields({
-      name: "How to verify?",
-      value: `Enter the command \`${config.command.secondaryPrefix} verify\` to verify`,
-    });
+  verifyEmbed.addFields({
+    name: "How to verify?",
+    value: `Enter the command \`${config.command.secondaryPrefix} verify\` to verify`,
+  });
 
   await channel.send({
     embeds: [verifyEmbed],
