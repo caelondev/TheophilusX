@@ -6,7 +6,7 @@ import { EmbedBuilder } from "discord.js";
 import { IEmbed } from "../../database/constants/embedSchema";
 import buildEmbed from "../../utils/buildEmbed";
 
-export default new TXEvent("guildMemberRemove", async (member) => {
+export default new TXEvent("guildMemberAdd", async (member) => {
   const guild = member.guild;
   const guildConfig = await GuildConfigs.findOne({ guildId: guild.id });
 
