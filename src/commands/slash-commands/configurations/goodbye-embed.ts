@@ -1,7 +1,7 @@
 import TXSlashCommand from "../../../structures/TXSlashCommand";
 import { PermissionFlagsBits, ApplicationCommandOptionType, EmbedBuilder, GuildBasedChannel } from "discord.js";
 import GuildConfigs from "../../../database/models/GuildConfigs";
-import { IEmbed } from "../../../database/models/GuildConfigs";
+import { IEmbed } from "../../../database/constants/embedSchema";
 import { TXVariableParserContext } from "../../../typings/Variables";
 import buildEmbed from "../../../utils/buildEmbed";
 import TXVariable from "../../../structures/TXVariables";

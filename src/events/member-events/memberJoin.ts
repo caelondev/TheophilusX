@@ -3,7 +3,7 @@ import GuildConfigs from "../../database/models/GuildConfigs";
 import TXVariable from "../../structures/TXVariables";
 import { TXVariableParserContext } from "../../typings/Variables";
 import { EmbedBuilder } from "discord.js";
-import { IEmbed } from "../../database/models/GuildConfigs";
+import { IEmbed } from "../../database/constants/embedSchema";
 import buildEmbed from "../../utils/buildEmbed";
 
 export default new TXEvent("guildMemberRemove", async (member) => {
