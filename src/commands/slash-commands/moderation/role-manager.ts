@@ -49,7 +49,7 @@ export default new TXSlashCommand({
         {
           name: "embed-name",
           description:
-            "Embed name from `/embed-builder` (can be multiple, comma-seperated)",
+            "Embed name from `/embed-builder` (can be multiple, comma-separated)",
           type: ApplicationCommandOptionType.String,
           required: false,
         },
@@ -107,7 +107,7 @@ export default new TXSlashCommand({
       case "initialize": {
         const channel = args.getChannel("channel") as TextChannel;
         const message = args.getString("message");
-        const embedNames = args.getString("embeds");
+        const embedNames = args.getString("embed-name");
 
         if (!channel || !channel.isTextBased()) {
           return interaction.editReply({
