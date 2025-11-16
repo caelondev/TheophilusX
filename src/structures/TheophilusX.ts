@@ -11,6 +11,7 @@ import {
   ClientEvents,
   Collection,
   GatewayIntentBits,
+  Options,
   Partials,
 } from "discord.js";
 import { SlashCommandType, TXCommandType } from "../typings/Command";
@@ -18,7 +19,7 @@ import { PrettyLogger as log, LogTag } from "../utils/PrettyLogger";
 import { glob } from "glob";
 import { RegisterCommandOptions } from "../typings/Client";
 import { TXEvent } from "./TXEvent";
-import path = require("path");
+import * as path from "path";
 
 export default class TheophilusX extends Client {
   public commands: Collection<string, SlashCommandType> = new Collection();
@@ -38,6 +39,16 @@ export default class TheophilusX extends Client {
         repliedUser: true,
       },
       failIfNotExists: false,
+      makeCache: Options.cacheWithLimits({
+        GuildMemberManager: 200,
+        UserManager: 200
+      }),
+      sweepers: {
+        messages: {
+          interval: 3600, // Every hour
+          lifetime: 1800, // Clear messages older than 30 min
+        },
+      }
     });
 
     this.slashCommands = [];

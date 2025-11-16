@@ -11,8 +11,5 @@ import { TXEvent } from "../../structures/TXEvent";
 export default new TXEvent("clientReady", async () => {
   await client.detectAndRemoveDuplicates();
 
-  const guildId = process.env.GUILD_ID;
-  if (guildId) {
-    await client.detectAndRemoveDuplicates(guildId);
-  }
+  await client.syncCommands({ commands: Array.from(client.commands.values()) });
 });
