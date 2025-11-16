@@ -1,3 +1,10 @@
+/**
+ * TheophilusX
+ * Copyright (C) 2025 caelondev
+ * Licensed under the GNU Affero General Public License v3.0
+ * See LICENSE file for details.
+ */
+
 import { TXEvent } from "../../structures/TXEvent";
 import GuildConfigs from "../../database/models/GuildConfigs";
 import TXVariable from "../../structures/TXVariables";
@@ -12,6 +19,7 @@ export default new TXEvent("guildMemberAdd", async (member) => {
 
   if (
     !guildConfig?.welcomeChannelId ||
+    !guildConfig.welcomeEmbedIsEnabled ||
     (!guildConfig.welcomeMessage && !guildConfig.welcomeEmbeds)
   )
     return;
@@ -24,12 +32,11 @@ export default new TXEvent("guildMemberAdd", async (member) => {
     guild,
   };
 
-  const rawContent = await new TXVariable().parse(
-    guildConfig.welcomeMessage!,
-    context,
-  );
+  const rawContent = guildConfig.welcomeMessage 
+    ? await new TXVariable().parse(guildConfig.welcomeMessage, context)
+    : null;
   const content = rawContent ?? undefined;
-  const embeds: EmbedBuilder[] = await setupEmbeds(guildConfig.embeds, context);
+  const embeds: EmbedBuilder[] = await setupEmbeds(guildConfig.welcomeEmbeds, context);
 
   channel.send({
     content,
