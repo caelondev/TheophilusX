@@ -1,10 +1,12 @@
+/**
+ * TheophilusX
+ * Copyright (C) 2025 caelondev
+ * Licensed under the GNU Affero General Public License v3.0
+ * See LICENSE file for details.
+ */
+
 import TXSlashCommand from "../../../structures/TXSlashCommand";
-import {
-  PermissionFlagsBits,
-  ApplicationCommandOptionType,
-  EmbedBuilder,
-  GuildBasedChannel,
-} from "discord.js";
+import { PermissionFlagsBits, ApplicationCommandOptionType, EmbedBuilder, GuildBasedChannel } from "discord.js";
 import GuildConfigs from "../../../database/models/GuildConfigs";
 import { IEmbed } from "../../../database/constants/embedSchema";
 import { TXVariableParserContext } from "../../../typings/Variables";
@@ -12,25 +14,24 @@ import buildEmbed from "../../../utils/buildEmbed";
 import TXVariable from "../../../structures/TXVariables";
 
 export default new TXSlashCommand({
-  name: "welcome-embed",
-  description: "Configure your welcome embed",
+  name: "goodbye-embed",
+  description: "Configure your goodbye embed",
   serverOnly: true,
   options: [
     {
       name: "set",
-      description: "Set your welcome embed",
+      description: "Set your goodbye embed",
       type: ApplicationCommandOptionType.Subcommand,
       options: [
         {
           name: "embed-name",
-          description:
-            "Embed name(s) from /embed-builder (comma-separated for multiple, e.g., welcome1,welcome2)",
+          description: "Embed name(s) from /embed-builder (comma-separated for multiple, e.g., welcome1,welcome2)",
           type: ApplicationCommandOptionType.String,
           required: true,
         },
         {
           name: "channel",
-          description: "The channel where the welcome embed will be sent",
+          description: "The channel where the goodbye embed will be sent",
           type: ApplicationCommandOptionType.Channel,
           required: true,
         },
@@ -43,7 +44,7 @@ export default new TXSlashCommand({
     },
     {
       name: "toggle",
-      description: "Toggles welcome embed",
+      description: "Toggles goodbye embed",
       type: ApplicationCommandOptionType.Subcommand,
       options: [
         {
@@ -56,7 +57,7 @@ export default new TXSlashCommand({
     },
     {
       name: "test",
-      description: "Sends the welcome embed",
+      description: "Sends the goodbye embed",
       type: ApplicationCommandOptionType.Subcommand,
     },
   ],
@@ -64,13 +65,10 @@ export default new TXSlashCommand({
   execute: async ({ interaction, args }) => {
     await interaction.deferReply();
 
-    const guildConfig = await GuildConfigs.findOne({
-      guildId: interaction.guild!.id,
-    });
+    const guildConfig = await GuildConfigs.findOne({ guildId: interaction.guild!.id });
     if (!guildConfig)
       return interaction.editReply({
-        content:
-          "No guild configurations found... Create one with `/embed-builder`",
+        content: "No guild configurations found... Create one with `/embed-builder`",
       });
 
     const txVariable = new TXVariable();
@@ -90,35 +88,26 @@ export default new TXSlashCommand({
     switch (subcommand) {
       case "toggle": {
         const isEnabled = args.getBoolean("enabled")!;
-        guildConfig.welcomeEmbedIsEnabled = isEnabled;
+        guildConfig.goodbyeEmbedIsEnabled = isEnabled;
         await guildConfig.save();
 
         const state = isEnabled ? "Enabled" : "Disabled";
-        return interaction.editReply({
-          content: `Successfully ${state} welcome embed`,
-        });
+        return interaction.editReply({ content: `Successfully ${state} goodbye embed` });
       }
 
       case "test": {
-        const parsedMessage = guildConfig.welcomeMessage
-          ? await txVariable.parse(guildConfig.welcomeMessage, context)
+        const parsedMessage = guildConfig.goodbyeMessage
+          ? await txVariable.parse(guildConfig.goodbyeMessage, context)
           : null;
 
-        const embeds: EmbedBuilder[] = await setupEmbeds(
-          guildConfig.welcomeEmbeds,
-          context,
-        );
+        const embeds: EmbedBuilder[] = await setupEmbeds(guildConfig.goodbyeEmbeds, context);
 
         if (!parsedMessage && embeds.length === 0)
           return interaction.editReply({
-            content:
-              "No welcome embed(s)/message found...\nConfigure welcome embed(s) with `/goodbye-embed set`",
+            content: "No goodbye embed(s)/message found...\nConfigure goodbye embed(s) with `/goodbye-embed set`",
           });
 
-        return interaction.editReply({
-          content: parsedMessage || undefined,
-          embeds,
-        });
+        return interaction.editReply({ content: parsedMessage || undefined, embeds });
       }
 
       case "set": {
@@ -127,9 +116,7 @@ export default new TXSlashCommand({
         const attachedMessage = args.getString("message") || null;
 
         if (!channel || !channel.isTextBased())
-          return interaction.editReply({
-            content: "Channel not found or is not text-based",
-          });
+          return interaction.editReply({ content: "Channel not found or is not text-based" });
 
         const embedNames = embedName
           .split(",")
@@ -139,29 +126,23 @@ export default new TXSlashCommand({
         const foundEmbedConfigs = findEmbeds(embedNames, guildConfig.embeds);
 
         if (!foundEmbedConfigs)
-          return interaction.editReply({
-            content: "One or more embeds not found",
-          });
+          return interaction.editReply({ content: "One or more embeds not found" });
 
-        guildConfig.welcomeEmbeds = foundEmbedConfigs;
-        guildConfig.welcomeMessage = attachedMessage;
-        guildConfig.welcomeEmbedIsEnabled = true;
-        guildConfig.welcomeChannelId = channel.id;
+        guildConfig.goodbyeEmbeds = foundEmbedConfigs;
+        guildConfig.goodbyeMessage = attachedMessage;
+        guildConfig.goodbyeEmbedIsEnabled = true;
+        guildConfig.goodbyeChannelId = channel.id;
         await guildConfig.save();
 
         return interaction.editReply({
-          content:
-            "Successfully setup welcome embed\nView it with `/welcome-embed test`",
+          content: "Successfully setup goodbye embed\nView it with `/goodbye-embed test`",
         });
       }
     }
   },
 });
 
-async function setupEmbeds(
-  embedConfigs: IEmbed[],
-  context: TXVariableParserContext,
-): Promise<EmbedBuilder[]> {
+async function setupEmbeds(embedConfigs: IEmbed[], context: TXVariableParserContext): Promise<EmbedBuilder[]> {
   const embeds: EmbedBuilder[] = [];
   for (const config of embedConfigs) {
     if (embeds.length >= 10) break;
