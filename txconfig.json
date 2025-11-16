@@ -1,6 +1,6 @@
 {
   "command": {
-    "secondaryPrefix": "tx!",
+    "secondaryPrefix": "tx>",
     "flagPrefix": "--"
   },
   "botStatus": {

@@ -24,7 +24,8 @@ export enum LogTag {
   LOGIN = "LOGIN",
   OTHER = "OTHER",
   READY = "READY",
-  WEB = "WEB"
+  WEB = "WEB",
+  SHARDS = "SHARDS"
 }
 
 interface LogOptions {

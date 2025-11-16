@@ -2,10 +2,11 @@
   "name": "TheophilusX",
   "version": "1.0.0",
   "description": "",
-  "main": "./dist/main.js",
+  "main": "./dist/sharder.js",
   "scripts": {
     "build": "tsc",
     "dev": "npx tsx watch ./src/main.ts",
+    "dev:shard": "npx tsx watch ./src/sharder.ts",
     "clean:unix": "rm -rf ./dist/",
     "clean:windows": "rmdir /s /q dist",
     "start": "node ."
