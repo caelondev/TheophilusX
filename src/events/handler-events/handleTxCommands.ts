@@ -1,9 +1,9 @@
 /**
- * TheophilusX
- * Copyright (C) 2025 caelondev
- * Licensed under the GNU Affero General Public License v3.0
- * See LICENSE file for details.
- */
+TheophilusX
+Copyright (C) 2025 caelondev
+Licensed under the GNU Affero General Public License v3.0
+See LICENSE file for details.
+*/
 
 import { client } from "../../main";
 import { TXEvent } from "../../structures/TXEvent";
@@ -11,7 +11,6 @@ import config from "../../../txconfig.json";
 import { GuildMessage } from "../../typings/Command";
 import capitalizeFirstLetter from "../../utils/capitalizeFirstLetter";
 import globalFlags from "../../constants/globalFlags";
-import { PrettyLogger as log, LogTag } from "../../utils/PrettyLogger";
 import { EmbedBuilder, GuildMember } from "discord.js";
 import setEphemeral from "../../utils/setEphemeral";
 
@@ -46,7 +45,6 @@ const getRemainingCooldown = (key: string) => {
 export default new TXEvent("messageCreate", async (message) => {
   if (message.author.bot) return;
   if (!message.content.startsWith(config.command.secondaryPrefix)) return;
-  if (!message.guild || !message.member) return;
 
   const prefix = config.command.secondaryPrefix;
   const msg = message.content.slice(prefix.length);
@@ -61,7 +59,13 @@ export default new TXEvent("messageCreate", async (message) => {
     );
     if (!commandObject) return;
 
-    const key = getKey(commandName, message.author.id, message.guild.id);
+    if (commandObject.serverOnly && !message.guild) {
+      await message.reply("This command can only be used in a server, not in DMs.");
+      return;
+    }
+
+    const guildId = message.guild?.id || "DM";
+    const key = getKey(commandName, message.author.id, guildId);
 
     if (isOnCooldown(key)) {
       const remaining = getRemainingCooldown(key);
@@ -89,8 +93,6 @@ export default new TXEvent("messageCreate", async (message) => {
 
     const args = tokens.slice(1);
     const usedFlags: string[] = [];
-    const member = message.member as GuildMember;
-    const bot = message.guild.members.me;
 
     for (const arg of args) {
       const flagPrefix = config.command.flagPrefix;
@@ -100,30 +102,33 @@ export default new TXEvent("messageCreate", async (message) => {
       usedFlags.push(argument.toLowerCase());
     }
 
-    if (commandObject.serverOnly && !message.guild) return;
+    if (message.guild && message.member) {
+      const member = message.member as GuildMember;
+      const bot = message.guild.members.me;
 
-    if (
-      commandObject.userPermissions &&
-      !member.permissions.has(commandObject.userPermissions)
-    ) {
-      await setEphemeral(
-        await message.reply(
-          "You don't have enough permission to run this command...",
-        ),
-      );
-      return;
-    }
+      if (
+        commandObject.userPermissions &&
+        !member.permissions.has(commandObject.userPermissions)
+      ) {
+        await setEphemeral(
+          await message.reply(
+            "You don't have enough permission to run this command...",
+          ),
+        );
+        return;
+      }
 
-    if (
-      commandObject.botPermissions &&
-      !bot?.permissions.has(commandObject.botPermissions)
-    ) {
-      await setEphemeral(
-        await message.reply(
-          "I don't have enough permission to run this command...",
-        ),
-      );
-      return;
+      if (
+        commandObject.botPermissions &&
+        !bot?.permissions.has(commandObject.botPermissions)
+      ) {
+        await setEphemeral(
+          await message.reply(
+            "I don't have enough permission to run this command...",
+          ),
+        );
+        return;
+      }
     }
 
     if (usedFlags.length > 0) {

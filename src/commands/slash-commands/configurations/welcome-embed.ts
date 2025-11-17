@@ -14,13 +14,13 @@ import buildEmbed from "../../../utils/buildEmbed";
 import TXVariable from "../../../structures/TXVariables";
 
 export default new TXSlashCommand({
-  name: "goodbye-embed",
-  description: "Configure your goodbye embed",
+  name: "welcome-embed",
+  description: "Configure your welcome embed",
   serverOnly: true,
   options: [
     {
       name: "set",
-      description: "Set your goodbye embed",
+      description: "Set your welcome embed",
       type: ApplicationCommandOptionType.Subcommand,
       options: [
         {
@@ -31,7 +31,7 @@ export default new TXSlashCommand({
         },
         {
           name: "channel",
-          description: "The channel where the goodbye embed will be sent",
+          description: "The channel where the welcome embed will be sent",
           type: ApplicationCommandOptionType.Channel,
           required: true,
         },
@@ -44,7 +44,7 @@ export default new TXSlashCommand({
     },
     {
       name: "toggle",
-      description: "Toggles goodbye embed",
+      description: "Toggles welcome embed",
       type: ApplicationCommandOptionType.Subcommand,
       options: [
         {
@@ -57,7 +57,7 @@ export default new TXSlashCommand({
     },
     {
       name: "test",
-      description: "Sends the goodbye embed",
+      description: "Sends the welcome embed",
       type: ApplicationCommandOptionType.Subcommand,
     },
   ],
@@ -88,23 +88,23 @@ export default new TXSlashCommand({
     switch (subcommand) {
       case "toggle": {
         const isEnabled = args.getBoolean("enabled")!;
-        guildConfig.goodbyeEmbedIsEnabled = isEnabled;
+        guildConfig.welcomeEmbedIsEnabled = isEnabled;
         await guildConfig.save();
 
         const state = isEnabled ? "Enabled" : "Disabled";
-        return interaction.editReply({ content: `Successfully ${state} goodbye embed` });
+        return interaction.editReply({ content: `Successfully ${state} welcome embed` });
       }
 
       case "test": {
-        const parsedMessage = guildConfig.goodbyeMessage
-          ? await txVariable.parse(guildConfig.goodbyeMessage, context)
+        const parsedMessage = guildConfig.welcomeMessage
+          ? await txVariable.parse(guildConfig.welcomeMessage, context)
           : null;
 
-        const embeds: EmbedBuilder[] = await setupEmbeds(guildConfig.goodbyeEmbeds, context);
+        const embeds: EmbedBuilder[] = await setupEmbeds(guildConfig.welcomeEmbeds, context);
 
         if (!parsedMessage && embeds.length === 0)
           return interaction.editReply({
-            content: "No goodbye embed(s)/message found...\nConfigure goodbye embed(s) with `/goodbye-embed set`",
+            content: "No welcome embed(s)/message found...\nConfigure welcome embed(s) with `/welcome-embed set`",
           });
 
         return interaction.editReply({ content: parsedMessage || undefined, embeds });
@@ -128,14 +128,14 @@ export default new TXSlashCommand({
         if (!foundEmbedConfigs)
           return interaction.editReply({ content: "One or more embeds not found" });
 
-        guildConfig.goodbyeEmbeds = foundEmbedConfigs;
-        guildConfig.goodbyeMessage = attachedMessage;
-        guildConfig.goodbyeEmbedIsEnabled = true;
-        guildConfig.goodbyeChannelId = channel.id;
+        guildConfig.welcomeEmbeds = foundEmbedConfigs;
+        guildConfig.welcomeMessage = attachedMessage;
+        guildConfig.welcomeEmbedIsEnabled = true;
+        guildConfig.welcomeChannelId = channel.id;
         await guildConfig.save();
 
         return interaction.editReply({
-          content: "Successfully setup goodbye embed\nView it with `/goodbye-embed test`",
+          content: "Successfully setup welcome embed\nView it with `/welcome-embed test`",
         });
       }
     }

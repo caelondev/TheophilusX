@@ -9,6 +9,7 @@ export default new TXSlashCommand({
   name: "variables",
   description: "Lists all existing placeholder variables",
   cooldown: 5000,
+  dmPermission: true,
   execute: async ({ interaction }) => {
     const formattedVariables = getFormattedVariablesArray();
     const embed = new EmbedBuilder()

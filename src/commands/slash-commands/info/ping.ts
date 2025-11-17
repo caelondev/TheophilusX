@@ -14,6 +14,7 @@ export default new TXSlashCommand({
   name: "ping",
   description: "Shows network and system info",
   cooldown: 3000,
+  dmPermission: true,
   execute: async ({ interaction, client }) => {
     try {
       const start = Date.now();
